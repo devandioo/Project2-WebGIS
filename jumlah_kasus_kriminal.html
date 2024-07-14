@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Devan</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+  </head>
+  <body>
+    <header style="text-align: center">
+      <h1>Jumlah Kasus Kriminal tiap Provinsi di Pulau Jawa tahun 2022</h1>
+    </header>
+
+    <div id="map" style="height: calc(100vh - 100px)"></div>
+
+    <script>
+      var pulauJawa = L.map("map").setView([-7.6145, 110.7121], 7);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 18,
+      }).addTo(pulauJawa);
+
+      fetch("pulau_jawa.json")
+        .then((response) => response.json())
+        .then((data) => {
+          data.forEach((location) => {
+            var marker = L.marker([location.latitude, location.longitude], {
+              icon: L.icon({
+                iconUrl:
+                  "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+              }),
+            }).addTo(pulauJawa);
+
+            let dayaTampung = Math.round(
+              location.populasi / (location.RS + location.klinik)
+            ).toLocaleString();
+
+            marker.bindPopup(
+              `<b>${location.name}</b>
+              <br>
+              <br>Jumlah Populasi: ${location.populasi.toLocaleString()} jiwa
+              <br>Luas Wilayah: ${location.luas} km²
+              <br>Kepadatan : ${Math.round(
+                location.populasi / location.luas
+              ).toLocaleString()} jiwa/km²
+              <br>Jumlah Kasus Kriminal: ${location.kriminal.toLocaleString()} kasus`
+            );
+          });
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    </script>
+  </body>
+</html>
